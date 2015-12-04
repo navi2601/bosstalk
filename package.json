@@ -2,14 +2,17 @@
   "name": "bosstalk",
   "version": "1.0.0",
   "description": "Source code for bosstalk.net website",
+  "private": true,
   "main": "js/app.js",
   "scripts": {
-    "start": "node lib/app.js"
+    "start": "node lib/app.js",
+    "clean": "rm -r lib/*.js* && rm -r public/js/*.entry.js*",
+    "build": "tsc && webpack"
   },
   "keywords": [
     "bosstalk"
   ],
-  "author": "Navpreet/Hongbin",
+  "author": "Navpreet Bajwa / Hongbin Hu",
   "license": "MIT",
   "dependencies": {
     "bootstrap": "^3.3.6",
