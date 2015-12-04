@@ -4,7 +4,7 @@
   "description": "Source code for bosstalk.net website",
   "main": "js/app.js",
   "scripts": {
-    "start": "node js/app.js"
+    "start": "node lib/app.js"
   },
   "keywords": [
     "bosstalk"
