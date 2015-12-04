@@ -1,19 +1,9 @@
 "use strict";
-
-import * as http from "http";
 import * as express from "express";
 
 const app = express();
-
 app.use(express.static("public"));
 
-app.get("/", (req, res) => {
-	res.send("Hello Boss!");
-});
-
-const server = app.listen(8888, () =>{
-	const port = server.address().port;
-	
-	console.log(`Boss is listening at port: ${port}`);
-	
+const server = app.listen(process.env.PORT || 1337, () =>{
+	console.log(`Boss is listening at port: ${server.address().port}`);
 });
