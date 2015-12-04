@@ -6,8 +6,8 @@
   "main": "js/app.js",
   "scripts": {
     "start": "node lib/app.js",
-    "clean": "rm -r lib/*.js* && rm -r public/js/*.entry.js*",
-    "build": "tsc && webpack"
+    "clean": "rm -r lib/*.js* && rm -r public/js/*.entry.js* && rm -r public/css/*.scss.css",
+    "build": "tsc && webpack && sass public/sass/main.scss public/css/main.scss.css"
   },
   "keywords": [
     "bosstalk"
@@ -15,9 +15,10 @@
   "author": "Navpreet Bajwa / Hongbin Hu",
   "license": "MIT",
   "dependencies": {
-    "bootstrap": "^3.3.6",
+    "bootstrap-sass": "^3.3.6",
     "express": "^4.13.3",
     "jquery": "^2.1.4",
+    "node-sass-middleware": "^0.9.7",
     "react": "^0.14.3",
     "react-dom": "^0.14.3"
   },

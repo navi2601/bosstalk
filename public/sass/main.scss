@@ -1,0 +1,14 @@
+@import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap"; // a lot of stuff...
+
+$backcolor: #ffffff;
+$frontcolor: #000000;
+
+body {
+	color: $frontcolor;
+	background-color: $backcolor;
+	
+	div.row-comp {
+		@extend .row;
+	}
+	
+}
