@@ -26,3 +26,14 @@ Here is an overview of the project directory structure.
 |public/images              |Image resources                                |
 |typings                    |TypeScript typing definitions from TSD         |
 
+##Running
+Before you run Boss Talk, make sure you have Node.JS and NPM installed.
+To run Boss Talk, pretty straight forward, just execute the following commands:
+
+```bash
+git clone https://github.com/benhongh/bosstalk.git bosstalk
+npm install
+npm run build
+npm start
+```
+
