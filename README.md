@@ -4,7 +4,7 @@
 
 Everyone has a boss.
 Rather than taking sh_ts from your boss day in and day out,
-We figure it's better to just share your conversation, 
+we figure it's better to just share your conversation, 
 and turn that negative energy into something we can all have a laugh of.
 So we have created this website 
 and hope that one day we may just get a Nobel Peace Prize.
@@ -16,7 +16,7 @@ Here is an overview of the project directory structure.
 
 |Directory                  |Purpose                                        |
 |---------------------------|-----------------------------------------------|
-|serve                      |Server Application folder (TypeScript)         |
+|server                     |Server Application folder (TypeScript)         |
 |lib                        |Compiled Server Application folder (JavaScript)|
 |public                     |Static content                                 |
 |public/ts                  |Client script folder (TypeScript)              |
