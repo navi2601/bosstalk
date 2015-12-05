@@ -4,10 +4,10 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as $ from "jquery";
-import * as Components from "./components";
+import {Row, Col, renderIn} from "./components";
 import * as api from "./api";
 
-@Components.renderIn("app-container")
+@renderIn("app-container")
 class AppComponent extends React.Component<any, {version: string}> {
 	api = new api.BossTalkApi();
 	
@@ -21,11 +21,12 @@ class AppComponent extends React.Component<any, {version: string}> {
 	}
 	
 	render() {
-		const row = Components.Row;
 		return (
-			<Components.Row>
-				Hello, Boss! (version {this.state.version})
-			</Components.Row>
+			<Row>
+				<Col sm={10} md={6} lg={3}>
+					Hello, Boss! (version {this.state.version})
+				</Col>
+			</Row>
 		);
 	}
 }

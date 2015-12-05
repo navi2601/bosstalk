@@ -6,9 +6,4 @@ $frontcolor: #000000;
 body {
 	color: $frontcolor;
 	background-color: $backcolor;
-	
-	div.row-comp {
-		@extend .row;
-	}
-	
 }
