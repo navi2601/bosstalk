@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"target": "ES5",
+		"outDir": "../js",
+		"module": "commonjs",
+		"jsx": "react",
+		"sourceMap": true,
+		"noImplicitAny": true,
+		"declaration": false,
+		"experimentalDecorators": true
+	},
+	"exclude": []
+}
