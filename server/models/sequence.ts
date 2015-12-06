@@ -252,13 +252,42 @@ class SeqImpl<T> implements Seq<T> {
 	}
 }
 
+class SeqArrayImpl<T> extends SeqImpl<T> {
+	private array: T[];
+	
+	constructor(array: T[]) {
+		super(array[Symbol.iterator]);
+		this.array = array;
+	}
+	
+	count(): number {
+		return this.array.length;
+	}
+	
+	take(n: number): Seq<T> {
+		const self = this;
+		return new SeqImpl<T>(function * (){
+			for (let i = 0; i < Math.min(n, self.array.length); ++i)
+				yield self.array[i];
+		});
+	}
+	
+	skip(n: number): Seq<T> {
+		const self = this;
+		return new SeqImpl<T>(function * (){
+			for (let i = n; i < self.array.length; ++i)
+				yield self.array[i];
+		});
+	}
+	
+	toArray(): T[] {
+		return this.array.slice(0, this.array.length);
+	}
+}
+
 export default class Sequence {
 	static fromArray<T>(array: T[]): Seq<T> {
-		return new SeqImpl<T>(function * (){
-			for (let i = 0; i < array.length; ++i) {
-				yield array[i];
-			}
-		})
+		return new SeqArrayImpl<T>(array);
 	}
 	
 	static fromGenerator<T>(gen: () => Iterator<T>): Seq<T> {
