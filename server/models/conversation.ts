@@ -1,5 +1,5 @@
 "use strict";
-import Sequence from "./sequence";
+import seq from "./sequence";
 
 export interface ConvoMessage {
 	speaker: string;
@@ -18,6 +18,6 @@ export class Conversation {
 	}
 
 	get parties(): Iterable<string> {
-		return Sequence.fromArray(this.messages).map(m => m.speaker).distinct();
+		return seq(this.messages).map(m => m.speaker).distinct();
 	}
 }

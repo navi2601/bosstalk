@@ -289,46 +289,72 @@ class SeqArrayImpl<T> extends SeqImpl<T> {
 	}
 }
 
-export default class Sequence {
-	static fromArray<T>(array: T[]): Seq<T> {
-		return new SeqArrayImpl<T>(array);
+export interface SeqStatic {
+	<T>(array: T[]): Seq<T>;
+	<T>(gen: () => Iterator<T>): Seq<T>;
+	<T>(iterable: Iterable<T>): Seq<T>;
+	empty<T>(): Seq<T>;
+	just<T>(value: T): Seq<T>;
+	repeat<T>(value: T, n: number): Seq<T>;
+	range(nFrom: number, nTo: number): Seq<number>;
+	infinite(): Seq<number>;
+}
+
+const seq: SeqStatic = <SeqStatic>function<T> (source: any): Seq<T> {
+	if (source === undefined) {
+		return new SeqImpl<T>(function * () { /* empty */});
 	}
 
-	static fromGenerator<T>(gen: () => Iterator<T>): Seq<T> {
+	if (source != null && typeof source === "function") {
+		const gen = <() => Iterator<T>>source;
 		return new SeqImpl<T>(gen);
 	}
 
-	static empty<T>(): Seq<T> {
-		return new SeqImpl<T>(function* () { /* empty */ });
+	if (source != null && source[Symbol.iterator] != null) {
+		const gen = <() => Iterator<T>>(source[Symbol.iterator]);
+		return new SeqImpl<T>(gen);
 	}
 
-	static just<T>(value: T): Seq<T> {
-		return new SeqImpl<T>(function* () {
+	if (source != null && typeof source === "object" && source instanceof Array) {
+		const array = <T[]>source;
+		return new SeqArrayImpl<T>(array);
+	}
+
+	return undefined;
+};
+
+seq.empty = function<T>(): Seq<T> {
+	return new SeqImpl<T>(function* () { /* empty */ });
+};
+
+seq.just = function <T>(value: T): Seq<T> {
+	return new SeqImpl<T>(function* () {
+		yield value;
+	});
+};
+
+seq.repeat = function <T>(value: T, n: number): Seq<T> {
+	return new SeqImpl<T>(function* () {
+		for (let i = 0; i < n; ++i) {
 			yield value;
-		});
-	}
+		}
+	});
+};
 
-	static repeat<T>(value: T, n: number): Seq<T> {
-		return new SeqImpl<T>(function* () {
-			for (let i = 0; i < n; ++i) {
-				yield value;
-			}
-		});
-	}
+seq.range =  function (nFrom: number, nTo: number) {
+	return new SeqImpl<number>(function* () {
+		for (let i = nFrom; i < nTo; ++i) {
+			yield i;
+		}
+	});
+};
 
-	static range(nFrom: number, nTo: number) {
-		return new SeqImpl<number>(function* () {
-			for (let i = nFrom; i < nTo; ++i) {
-				yield i;
-			}
-		});
-	}
+seq.infinite =function (): Seq<number> {
+	return new SeqImpl<number>(function* () {
+		for (let i = 0; true; ++i) {
+			yield i;
+		}
+	});
+};
 
-	static inifinit(): Seq<number> {
-		return new SeqImpl<number>(function* () {
-			for (let i = 0; true; ++i) {
-				yield i;
-			}
-		});
-	}
-}
+export default seq;
