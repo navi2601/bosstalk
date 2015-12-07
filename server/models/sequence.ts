@@ -1,28 +1,95 @@
 "use strict";
 
+import typeInfo from "./typeinfo";
+
 export interface Grouping<TKey, TVal> {
 	key: TKey;
 	values: Seq<TVal>;
 }
 
 export interface Seq<T> extends Iterable<T> {
+	/** apply a function on every element of the sequence
+	 * @param func function to be applied for each element
+	 */
 	forEach(func: (t: T) => void): void;
+
+	/** transform a sequence by mapping each element through a function
+	 * @param func transform function
+	 */
 	map<U>(func: (t: T) => U): Seq<U>;
+
+	/** transform a sequence by mapping each element to its own sequence, then joins these sub-sequences into a single sequence
+	 * @param func transform function to turns each element into a separate sequence
+	  */
 	flatMap<U>(func: (t: T) => Seq<U>): Seq<U>;
+
+	/** filter a sequence by applying a predicate on each element
+	 * @param predicate the predicate function to decide whether an element is to appear in the new sequence
+	 */
 	filter(predicate: (t: T) => boolean): Seq<T>;
+
+	/** create a new sequence of distinct elements from current sequence */
 	distinct(): Seq<T>;
+
+	/** create a new sequence of elements each has a distinct key
+	 * @param keySelector function to extract the key from each element
+	 */
 	distinctBy<U>(keySelector: (t: T) => U): Seq<T>;
+
+	/** reducing a sequence into a single value, starting from an initial value.
+	 * @param initialValue the initial value of reduction
+	 * @param reducer reducer function
+	 */
 	reduce<U>(initialValue: U, reducer: (left: U, right: T) => U): U;
+
+	/** returns the first element of the sequence, or undefined if sequence is empty */
 	first(): T;
+
+	/** returns the last element of the sequence, or undefined if sequence is empty */
 	last(): T;
+
+	/** count the number of elements in the sequence */
 	count(): number;
+
+	/** take the first n elements of the sequence
+	 * @param n number of elements to take
+	 */
 	take(n: number): Seq<T>;
+
+	/** skip the first n elements of the sequence, and return the remaining elements 
+	 * @param n number of elements to skip
+	 */
 	skip(n: number): Seq<T>;
+
+	/** creates a new sequence by taking elements from the current sequence while the element satisfies a condition
+	 * @param predicate condition under which the element is taken for the new sequence
+	 */
 	takeWhile(predicate: (t: T) => boolean): Seq<T>;
+
+	/** skip the first few elements from the sequence that satisfies a condition,
+	 * and create a new sequence with the remaining elements
+	 * @param predicate condition under which the element is skipped
+	 */
 	skipWhile(predicate: (t: T) => boolean): Seq<T>;
+
+	/** group the sequence by a key
+	 * @param keySelector key extraction function
+	 */
 	groupBy<U>(keySelector: (t: T) => U): Seq<Grouping<T, U>>;
+
+	/** concatenate the sequence with another sequence
+	 * @param other the other sequence
+	 */
 	concat(other: Seq<T>): Seq<T>;
+
+	/** creats a new sequence by transforming each element from the sequence and its corresponding element from 
+	 * the other sequence into a new element
+	 * @param other the other sequence
+	 * @param zipper transform function
+	 */
 	zip<U, V>(other: Seq<U>, zipper: (t: T, u: U) => V): Seq<V>;
+
+	/** turns a sequence into an array */
 	toArray(): T[];
 }
 
@@ -209,7 +276,7 @@ class SeqImpl<T> implements Seq<T> {
 				const values = entry[1];
 				yield {
 					key: entry[0],
-					values: Sequence.fromArray(values)
+					values: new SeqArrayImpl<T>(values)
 				};
 			}
 		});
@@ -290,32 +357,62 @@ class SeqArrayImpl<T> extends SeqImpl<T> {
 }
 
 export interface SeqStatic {
+	/** creates a sequence from an array 
+	 * @param array the source array
+	 */
 	<T>(array: T[]): Seq<T>;
+
+	/** creates a sequence from an generator function 
+	 * @param gen the generator function 
+	 */
 	<T>(gen: () => Iterator<T>): Seq<T>;
+
+	/** creates a sequence from an iterable
+	 * @param iterable the iterable
+	 */
 	<T>(iterable: Iterable<T>): Seq<T>;
+
+	/** creates an empty sequence */
 	empty<T>(): Seq<T>;
+
+	/** creates a sequence of a single element
+	 * @param value the single value
+	 */
 	just<T>(value: T): Seq<T>;
+
+	/** creates a sequence by repeating a value 
+	 * @param value the value to be repeated
+	 * @param n number of repetitions
+	 */
 	repeat<T>(value: T, n: number): Seq<T>;
+
+	/** creates a number sequence [nFrom, nTo[
+	 * @param nFrom first value of range
+	 * @param nTo one past last value of range
+	 */
 	range(nFrom: number, nTo: number): Seq<number>;
+
+	/** creates an infinite sequence of numbers, starting with 0 and increment by 1 */
 	infinite(): Seq<number>;
 }
 
 const seq: SeqStatic = <SeqStatic>function<T> (source: any): Seq<T> {
-	if (source === undefined) {
+	const ti = typeInfo(source);
+	if (ti.isUndefined) {
 		return new SeqImpl<T>(function * () { /* empty */});
 	}
 
-	if (source != null && typeof source === "function") {
+	if (ti.isFunction) {
 		const gen = <() => Iterator<T>>source;
 		return new SeqImpl<T>(gen);
 	}
 
-	if (source != null && source[Symbol.iterator] != null) {
+	if (ti.isIterable) {
 		const gen = <() => Iterator<T>>(source[Symbol.iterator]);
 		return new SeqImpl<T>(gen);
 	}
 
-	if (source != null && typeof source === "object" && source instanceof Array) {
+	if (ti.isArray) {
 		const array = <T[]>source;
 		return new SeqArrayImpl<T>(array);
 	}
