@@ -8,6 +8,7 @@ export interface ConvoMessage {
 
 export class Conversation {
 	uploadTime: Date;
+	title: string;
 	context: string;
 	messages: ConvoMessage[];
 
