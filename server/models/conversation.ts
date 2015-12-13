@@ -1,4 +1,5 @@
 "use strict";
+import {Entity} from "./entity";
 import seq from "./sequence";
 
 export interface ConvoMessage {
@@ -6,13 +7,15 @@ export interface ConvoMessage {
 	message: string;
 }
 
-export class Conversation {
+export class Conversation implements Entity {
+	id: string;
 	uploadTime: Date;
 	title: string;
 	context: string;
 	messages: ConvoMessage[];
 
 	constructor() {
+		this.id = "";
 		this.uploadTime = new Date();
 		this.context = "";
 		this.messages = [];

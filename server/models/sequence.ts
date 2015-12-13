@@ -82,6 +82,9 @@ export interface Seq<T> extends Iterable<T> {
 	 */
 	sort(compareFunc?: (left: T, right: T) => number): Seq<T>;
 
+	/** reverse a sequence */
+	reverse(): Seq<T>;
+
 	/** concatenate the sequence with another sequence
 	 * @param other the other sequence
 	 */
@@ -317,6 +320,10 @@ class SeqImpl<T> implements Seq<T> {
 		return new SeqArrayImpl<T>(this.toArray().sort(compareFunc));
 	}
 
+	reverse(): Seq<T> {
+		return new SeqArrayImpl<T>(this.toArray().reverse());
+	}
+
 	concat(other: Seq<T>): Seq<T> {
 		const self = this;
 		return new SeqImpl<T>(function* () {
@@ -396,6 +403,15 @@ class SeqArrayImpl<T> extends SeqImpl<T> {
 		const self = this;
 		return new SeqImpl<T>(function* () {
 			for (let i = n; i < self.array.length; ++i) {
+				yield self.array[i];
+			}
+		});
+	}
+
+	reverse(): Seq<T>{
+		const self = this;
+		return new SeqImpl<T>(function * () {
+			for (let i = self.array.length - 1; i >= 0; --i) {
 				yield self.array[i];
 			}
 		});
