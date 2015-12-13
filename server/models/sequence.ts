@@ -11,22 +11,22 @@ export interface Seq<T> extends Iterable<T> {
 	/** apply a function on every element of the sequence
 	 * @param func function to be applied for each element
 	 */
-	forEach(func: (t: T) => void): void;
+	forEach(func: (t: T, index?: number) => void): void;
 
 	/** transform a sequence by mapping each element through a function
 	 * @param func transform function
 	 */
-	map<U>(func: (t: T) => U): Seq<U>;
+	map<U>(func: (t: T, index?: number) => U): Seq<U>;
 
 	/** transform a sequence by mapping each element to its own sequence, then joins these sub-sequences into a single sequence
 	 * @param func transform function to turns each element into a separate sequence
 	  */
-	flatMap<U>(func: (t: T) => Seq<U>): Seq<U>;
+	flatMap<U>(func: (t: T, index?: number) => Seq<U>): Seq<U>;
 
 	/** filter a sequence by applying a predicate on each element
 	 * @param predicate the predicate function to decide whether an element is to appear in the new sequence
 	 */
-	filter(predicate: (t: T) => boolean): Seq<T>;
+	filter(predicate: (t: T, index?: number) => boolean): Seq<T>;
 
 	/** create a new sequence of distinct elements from current sequence */
 	distinct(): Seq<T>;
@@ -34,7 +34,7 @@ export interface Seq<T> extends Iterable<T> {
 	/** create a new sequence of elements each has a distinct key
 	 * @param keySelector function to extract the key from each element
 	 */
-	distinctBy<U>(keySelector: (t: T) => U): Seq<T>;
+	distinctBy<U>(keySelector: (t: T, index?: number) => U): Seq<T>;
 
 	/** reducing a sequence into a single value, starting from an initial value.
 	 * @param initialValue the initial value of reduction
@@ -64,18 +64,23 @@ export interface Seq<T> extends Iterable<T> {
 	/** creates a new sequence by taking elements from the current sequence while the element satisfies a condition
 	 * @param predicate condition under which the element is taken for the new sequence
 	 */
-	takeWhile(predicate: (t: T) => boolean): Seq<T>;
+	takeWhile(predicate: (t: T, index?: number) => boolean): Seq<T>;
 
 	/** skip the first few elements from the sequence that satisfies a condition,
 	 * and create a new sequence with the remaining elements
 	 * @param predicate condition under which the element is skipped
 	 */
-	skipWhile(predicate: (t: T) => boolean): Seq<T>;
+	skipWhile(predicate: (t: T, index?: number) => boolean): Seq<T>;
 
 	/** group the sequence by a key
 	 * @param keySelector key extraction function
 	 */
-	groupBy<U>(keySelector: (t: T) => U): Seq<Grouping<T, U>>;
+	groupBy<U>(keySelector: (t: T, index?: number) => U): Seq<Grouping<U, T>>;
+
+	/** sorting a sequence
+	 * @param compareFunc the compare function with the same semantics as Array.prototype.sort
+	 */
+	sort(compareFunc?: (left: T, right: T) => number): Seq<T>;
 
 	/** concatenate the sequence with another sequence
 	 * @param other the other sequence
@@ -89,6 +94,11 @@ export interface Seq<T> extends Iterable<T> {
 	 */
 	zip<U, V>(other: Seq<U>, zipper: (t: T, u: U) => V): Seq<V>;
 
+	/** yield a single element if the sequence is empty 
+	 * @param defaultValue the value of the single element if the current sequence is empty
+	*/
+	defaultWith(defaultValue: T): Seq<T>;
+
 	/** turns a sequence into an array */
 	toArray(): T[];
 }
@@ -100,39 +110,49 @@ class SeqImpl<T> implements Seq<T> {
 		this[Symbol.iterator] = iteratorFunc;
 	}
 
-	forEach(func: (t: T) => void): void {
-		for (let t of this) {
-			func(t);
+	forEach(func: (t: T, index?: number) => void): void {
+		let index = 0;
+		for (const t of this) {
+			func(t, index);
+			++index;
 		}
 	}
 
-	map<U>(func: (t: T) => U): Seq<U> {
+	map<U>(func: (t: T, index?: number) => U): Seq<U> {
 		const self = this;
 		return new SeqImpl<U>(function* () {
-			for (let t of self) {
-				yield func(t);
+			let index = 0;
+			for (const t of self) {
+				yield func(t, index);
+				++index;
 			}
 		});
 	}
 
-	flatMap<U>(func: (t: T) => Seq<U>): Seq<U> {
+	flatMap<U>(func: (t: T, index?: number) => Seq<U>): Seq<U> {
 		const self = this;
 		return new SeqImpl<U>(function* () {
-			for (let seq of self) {
-				for (let u of func(seq)) {
+			let index = 0;
+			for (const seq of self) {
+				for (const u of func(seq, index)) {
 					yield u;
 				}
+
+				++index;
 			}
 		});
 	}
 
-	filter(predicate: (t: T) => boolean): Seq<T> {
+	filter(predicate: (t: T, index?: number) => boolean): Seq<T> {
 		const self = this;
 		return new SeqImpl<T>(function* () {
-			for (let t of self) {
-				if (predicate(t)) {
+			let index = 0;
+			for (const t of self) {
+				if (predicate(t, index)) {
 					yield t;
 				}
+
+				++index;
 			}
 		});
 	}
@@ -141,7 +161,7 @@ class SeqImpl<T> implements Seq<T> {
 		const set = new Set<T>();
 		const self = this;
 		return new SeqImpl<T>(function* () {
-			for (let t of self) {
+			for (const t of self) {
 				if (!set.has(t)) {
 					set.add(t);
 					yield t;
@@ -150,23 +170,26 @@ class SeqImpl<T> implements Seq<T> {
 		});
 	}
 
-	distinctBy<U>(keySelector: (t: T) => U): Seq<T> {
+	distinctBy<U>(keySelector: (t: T, index?: number) => U): Seq<T> {
 		const set = new Set<U>();
 		const self = this;
 		return new SeqImpl<T>(function* () {
-			for (let t of self) {
-				const key = keySelector(t);
+			let index = 0;
+			for (const t of self) {
+				const key = keySelector(t, index);
 				if (!set.has(key)) {
 					set.add(key);
 					yield t;
 				}
+
+				++index;
 			}
 		});
 	}
 
 	reduce<U>(initialValue: U, reducer: (left: U, right: T) => U): U {
 		let left = initialValue;
-		for (let right of this) {
+		for (const right of this) {
 			left = reducer(left, right);
 		}
 
@@ -174,7 +197,7 @@ class SeqImpl<T> implements Seq<T> {
 	}
 
 	first(): T {
-		for (let t of this) {
+		for (const t of this) {
 			return t;
 		}
 
@@ -183,7 +206,7 @@ class SeqImpl<T> implements Seq<T> {
 
 	last(): T {
 		let temp: T = undefined;
-		for (let t of this) {
+		for (const t of this) {
 			temp = t;
 		}
 
@@ -192,7 +215,7 @@ class SeqImpl<T> implements Seq<T> {
 
 	count(): number {
 		let n = 0;
-		for (let t of this) {
+		for (const t of this) {
 			++n;
 		}
 
@@ -203,7 +226,7 @@ class SeqImpl<T> implements Seq<T> {
 		const self = this;
 		return new SeqImpl<T>(function* () {
 			let taken = 0;
-			for (let t of self) {
+			for (const t of self) {
 				if (taken < n) {
 					++taken;
 					yield t;
@@ -219,7 +242,7 @@ class SeqImpl<T> implements Seq<T> {
 		const self = this;
 		return new SeqImpl<T>(function* () {
 			let skipped = 0;
-			for (let t of self) {
+			for (const t of self) {
 				if (skipped < n) {
 					++skipped;
 				}
@@ -230,37 +253,44 @@ class SeqImpl<T> implements Seq<T> {
 		});
 	}
 
-	takeWhile(predicate: (t: T) => boolean): Seq<T> {
+	takeWhile(predicate: (t: T, index?: number) => boolean): Seq<T> {
 		const self = this;
 		return new SeqImpl<T>(function* () {
-			for (let t of self) {
-				if (predicate(t)) {
+			let index = 0;
+			for (const t of self) {
+				if (predicate(t, index)) {
 					yield t;
 				}
+
+				++index;
 			}
 		});
 	}
 
-	skipWhile(predicate: (t: T) => boolean): Seq<T> {
+	skipWhile(predicate: (t: T, index?: number) => boolean): Seq<T> {
 		const self = this;
 		let skip = true;
 		return new SeqImpl<T>(function* () {
-			for (let t of self) {
-				if (skip && predicate(t)) {
+			let index = 0;
+			for (const t of self) {
+				if (skip && predicate(t, index)) {
 					continue;
 				}
 				else {
 					skip = false;
 					yield t;
 				}
+
+				++index;
 			}
 		});
 	}
 
-	groupBy<U>(keySelector: (t: T) => U): Seq<Grouping<U, T>> {
+	groupBy<U>(keySelector: (t: T, index?: number) => U): Seq<Grouping<U, T>> {
 		const map = new Map<U, T[]>();
+		let index = 0;
 		for (let t of this) {
-			const key = keySelector(t);
+			const key = keySelector(t, index);
 			let array = map.get(key);
 			if (array === undefined) {
 				array = [];
@@ -268,6 +298,7 @@ class SeqImpl<T> implements Seq<T> {
 			}
 
 			array.push(t);
+			++index;
 		}
 
 		return new SeqImpl<Grouping<U, T>>(function* () {
@@ -280,6 +311,10 @@ class SeqImpl<T> implements Seq<T> {
 				};
 			}
 		});
+	}
+
+	sort(compareFunc?: (left: T, right: T) => number): Seq<T> {
+		return new SeqArrayImpl<T>(this.toArray().sort(compareFunc));
 	}
 
 	concat(other: Seq<T>): Seq<T> {
@@ -307,6 +342,21 @@ class SeqImpl<T> implements Seq<T> {
 				else {
 					yield zipper(x, other.value);
 				}
+			}
+		});
+	}
+
+	defaultWith(defaultValue: T): Seq<T> {
+		const self = this;
+		return new SeqImpl<T>(function * () {
+			let isEmpty = true;
+			for (const x of self) {
+				isEmpty = false;
+				yield x;
+			}
+
+			if (!isEmpty) {
+				yield defaultValue;
 			}
 		});
 	}
@@ -352,7 +402,7 @@ class SeqArrayImpl<T> extends SeqImpl<T> {
 	}
 
 	toArray(): T[] {
-		return this.array.slice(0, this.array.length);
+		return this.array;
 	}
 }
 
@@ -394,6 +444,31 @@ export interface SeqStatic {
 
 	/** creates an infinite sequence of numbers, starting with 0 and increment by 1 */
 	infinite(): Seq<number>;
+
+	/** sum sequence 
+	 * @param seq sequence of numbers to sum
+	*/
+	sum(seq: Seq<number>): number;
+
+	/** average sequence 
+	 * @param seq sequence of numbers to average, must not be empty
+	*/
+	average(seq: Seq<number>): number;
+
+	/** maximum of sequence
+	 * @param seq sequence of numbers from which the maximum is queried
+	 */
+	max(seq: Seq<number>): number;
+
+	/** minimum of sequence 
+	 * @param seq sequence of numbers from which the minimum is queried
+	*/
+	min(seq: Seq<number>): number;
+
+	/** join sequence of string 
+	 * @param seq sequence of strings to join
+	*/
+	join(seq: Seq<string>, separator?: string): string;
 }
 
 const seq: SeqStatic = <SeqStatic>function<T> (source: any): Seq<T> {
@@ -452,6 +527,29 @@ seq.infinite =function (): Seq<number> {
 			yield i;
 		}
 	});
+};
+
+seq.sum = function (seq: Seq<number>): number {
+	return seq.reduce(0, (x, y) => x + y);
+};
+
+seq.max = function (seq: Seq<number>): number {
+	return seq.reduce(undefined, (x, y) => x === undefined? y: Math.max(x, y));
+};
+
+seq.min = function (seq: Seq<number>): number {
+	return seq.reduce(undefined, (x, y) => x === undefined? y: Math.min(x, y));
+};
+
+seq.average = function (seq: Seq<number>): number {
+	return seq.reduce({n: 0, avg: <number>undefined}, (x, y) => ({
+		n: x.n + 1,
+		avg: (x.n/(x.n+1))*(x.avg | 0) + y/(x.n+1)
+	})).avg;
+};
+
+seq.join = function (seq: Seq<string>, separator?: string): string {
+	return seq.toArray().join(separator);
 };
 
 export default seq;
