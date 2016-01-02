@@ -1,10 +1,7 @@
 "use strict";
 import * as express from "express";
 import * as bodyParser from "body-parser";
-import * as mongoose from "mongoose";
 import {talkModel, discussionModel} from "../persistence/mongodb";
-
-import typeInfo from "../utilities/typeinfo";
 import {optional} from "../utilities/optional";
 
 const router = express.Router();
