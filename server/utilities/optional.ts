@@ -1,17 +1,46 @@
 import typeInfo from "./typeinfo";
 
 export interface Optional<T> {
+    /** Check if this optional has a value. */
     hasValue: boolean;
+    
+    /** Forcibly retrieve the value of this optional. If this is a None optional, an exception will be thrown */
     value: T;
+    
+    /** Transform the current optional by applying a transformation function
+     * @param f the transformation function.
+     */
     map<U>(f: (t: T) => U): Optional<U>;
+    
+    /** Transform and flattens the current optional by applying a transformation function
+     * @param f the transformation function
+     */
     flatMap<U>(f: (t: T) => Optional<U>): Optional<U>;
-    defaultIfNone(t: T): Optional<T>;
+    
+    /** Replaces a None optional with an optional with a value by supplying that value 
+     * @param defaultValue the default value as replacement if the current optional is None
+     */
+    defaultIfNone(defaultValue: T): Optional<T>;
 }
 
 interface OptionalFunc {
+    /** Normalise an optional.
+     * @param value an existing optional. If null or undefined is passed in, a None<T> optional will be returned
+     */
     <T>(value: Optional<T>): Optional<T>;
+    
+    /** Wrapping a value of type T into an Optional<T>.
+     * @param value the content to wrap around. If null or undefined is passed in, a None<T> optional will be returned.
+     */
     <T>(value: T): Optional<T>;
+    
+    /** Returning a None<T> optional
+     */
     none<T>(): Optional<T>;
+    
+    /** Test if an existing value is an optional
+     * @param test the value to test if it is an optional
+     */
     isOptional(test: any): boolean;
 }
 
