@@ -18,7 +18,7 @@ router.get("/talks", (req, res) => {
     const count = optional(<number>req.query.count).defaultIfNone(20).value;
     const criteria = {};
     
-    talkModel.entityCtor.find(criteria).skip(from).limit(count).find((err, talks) => {
+    talkModel.find(criteria).skip(from).limit(count).find((err, talks) => {
         if (optional(err).hasValue) {
             res.json({
                 status: "ok",
@@ -35,7 +35,7 @@ router.get("/talks", (req, res) => {
 });
 
 router.post("/talks", bodyParser.json(), (req, res) => {
-    const newTalk = talkModel(req.body);
+    const newTalk = new talkModel(req.body);
     newTalk.save((err, ignore) => {
         if (optional(err).hasValue) {
             res.json({
@@ -55,7 +55,7 @@ router.get("discussions/:talkId", (req, res) => {
     const talkId = optional(req.params.talkId);
     if (talkId.hasValue) {
         const criteria = { talkId: talkId };
-        discussionModel.entityCtor.findOne(criteria, (err, discussion) => {
+        discussionModel.findOne(criteria, (err, discussion) => {
             if (optional(err).hasValue) {
                 res.json({
                     status: "ok",

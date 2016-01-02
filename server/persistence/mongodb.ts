@@ -1,8 +1,10 @@
-import {default as entity, MongooseEntityPackage} from "./mongoose-wrapper";
+"use strict";
+
+import {default as entity} from "./mongoose-wrapper";
 import {Talk, Discussion} from "../models/talk";
 import * as mongoose from "mongoose";
 
-const talkModel: MongooseEntityPackage<Talk> = entity<Talk>("talk", {
+const talkModel = entity<Talk>("talk", {
     timestamp: Date,
     title: String,
     context: String,
@@ -12,7 +14,7 @@ const talkModel: MongooseEntityPackage<Talk> = entity<Talk>("talk", {
     }]
 });
 
-const discussionModel: MongooseEntityPackage<Discussion> = entity<Discussion>("discussion", {
+const discussionModel = entity<Discussion>("discussion", {
     talkId: mongoose.Types.ObjectId,
     entries: [{
         poster: String,
