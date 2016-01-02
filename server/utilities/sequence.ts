@@ -408,7 +408,7 @@ class SeqArrayImpl<T> extends SeqImpl<T> {
         });
     }
 
-    reverse(): Seq<T>{
+    reverse(): Seq<T> {
         const self = this;
         return new SeqImpl<T>(function * (): any {
             for (let i = self.array.length - 1; i >= 0; --i) {
@@ -530,15 +530,15 @@ seq.repeat = function <T>(value: T, n: number): Seq<T> {
 };
 
 seq.range =  function (nFrom: number, nTo: number): Seq<number> {
-    return new SeqImpl<number>(function* () {
+    return new SeqImpl<number>(function* (): any {
         for (let i = nFrom; i < nTo; ++i) {
             yield i;
         }
     });
 };
 
-seq.infinite =function (): Seq<number> {
-    return new SeqImpl<number>(function* () {
+seq.infinite = function (): Seq<number> {
+    return new SeqImpl<number>(function* (): any {
         for (let i = 0; true; ++i) {
             yield i;
         }
@@ -562,7 +562,7 @@ seq.average = function (subject: Seq<number>): number {
         return n === undefined ? 0 : n;
     }
     
-    return subject.reduce({avg: <number>undefined, n: 0}, (x, y) => ({
+    return subject.reduce({avg: <number> undefined, n: 0}, (x, y) => ({
         avg: (x.n / (x.n + 1)) * undefinedToZero(x.avg) + y / (x.n + 1),
         n: x.n + 1
     })).avg;
