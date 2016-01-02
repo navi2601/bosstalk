@@ -1,3 +1,4 @@
+"use strict";
 import typeInfo from "./typeinfo";
 
 export interface Optional<T> {
@@ -23,7 +24,7 @@ export interface Optional<T> {
     defaultIfNone(defaultValue: T): Optional<T>;
 }
 
-interface OptionalFunc {
+export interface OptionalFunc {
     /** Normalise an optional.
      * @param value an existing optional. If null or undefined is passed in, a None<T> optional will be returned
      */
