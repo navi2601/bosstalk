@@ -5,8 +5,18 @@ export interface Optional<T> {
     /** Check if this optional has a value. */
     hasValue: boolean;
     
-    /** Forcibly retrieve the value of this optional. If this is a None optional, an exception will be thrown */
-    value: T;
+    /** Forcibly retrieve the value of this optional. If this is a None optional, an error will be thrown */
+    valueOrThrow(error?: any): T;
+    
+    /** Safely retrieve either the value, if available, or a default value, if the optional is none 
+     * @param defaultValue the default value to be returned if the optional is none
+     */
+    valueOrDefault(defaultValue: T): T;
+    
+    /** Check equality
+     * @param other the other optional against which the equality is checked
+     */
+    equals(other: Optional<T>): boolean;
     
     /** Transform the current optional by applying a transformation function
      * @param f the transformation function.
@@ -34,6 +44,16 @@ export interface Optional<T> {
      * @param f value combiner
      */
     flatCombine<U, V>(other: Optional<U>, f: (t: T, u: U) => Optional<V>): Optional<V>;
+    
+    /** Conditionally execute functions based on value availability
+     * param some function to be executed if the optional has a value
+     */
+    ifHasValue(some: (t: T) => void): { 
+        /** Supply a counter condition
+         * @param none function to be executed if the optional does not have a value
+         */
+        otherwise(none: () => void): void 
+    };
 }
 
 export interface OptionalFunc {
@@ -87,7 +107,18 @@ class Some<T> implements Optional<T> {
     }
     
     get hasValue(): boolean { return true; }
-    get value(): T { return this._value; }
+    
+    equals(other: Optional<T>): boolean {
+        return optional(other).map(right => this._value === right).valueOrDefault(false);
+    }
+    
+    valueOrThrow(error?: any): T {
+        return this._value;
+    }
+    
+    valueOrDefault(defaultValue: T): T {
+        return this._value;
+    }
     
     map<U>(f: (t: T) => U): Optional<U> {
         return optional(f(this._value));
@@ -108,13 +139,41 @@ class Some<T> implements Optional<T> {
     flatCombine<U, V>(other: Optional<U>, f: (t: T, u: U) => Optional<V>): Optional<V> {
         return this.flatMap(t => other.flatMap(u => f(t, u)));
     }
+    
+    ifHasValue(some: (t: T) => void): { otherwise(none: () => void): void } {
+        some(this._value);
+        return {
+            otherwise: function (none: () => void): void { /* nothing to do */ }
+        };
+    }
 }
 
 class None<T> implements Optional<T> {
     static instance = new None();
-    get hasValue(): boolean { return true; }
-    get value(): T { 
-        throw new Error("Optional value does not exist"); 
+    get hasValue(): boolean { return false; }
+    
+    equals(other: Optional<T>): boolean {
+        return !optional(other).hasValue;
+    }
+    
+    valueOrThrow(error?: any): T {
+        if (optional(error).hasValue) {
+            throw error;
+        }
+        else {
+            throw new Error("Value not available");
+        }
+        
+        /* The following return statement will never get executed,
+           but it is placed here to keep TypeScript compiler happy because
+           TypeScript 1.7 does not do control flow analysis and as such is
+           not smart enough to figure out that this function is going to throw
+           and is never going to return anything. */
+        return undefined;
+    }
+    
+    valueOrDefault(defaultValue: T): T {
+        return defaultValue;
     }
     
     map<U>(f: (t: T) => U): Optional<U> {
@@ -135,6 +194,14 @@ class None<T> implements Optional<T> {
     
     flatCombine<U, V>(other: Optional<U>, f: (t: T, u: U) => Optional<V>): Optional<V> {
         return optional.none<V>();
+    }
+    
+    ifHasValue(some: (t: T) => void): { otherwise(none: () => void): void } {
+        return {
+            otherwise: function (none: () => void): void {
+                none();
+            }
+        };
     }
 }
 

@@ -8,6 +8,7 @@
 	},
 	"files": [
         "server/app.ts",
+        "tests/index.ts",
         "typings/tsd.d.ts"
     ]
 }

@@ -14,8 +14,8 @@ router.get("/version", (req, res) => {
 });
 
 router.get("/talks", (req, res) => {
-    const from = optional(<number>req.query.from).defaultIfNone(0).value;
-    const count = optional(<number>req.query.count).defaultIfNone(20).value;
+    const from = optional(<number>req.query.from).valueOrDefault(0);
+    const count = optional(<number>req.query.count).valueOrDefault(20);
     const criteria = {};
     
     talkModel.find(criteria).skip(from).limit(count).find((err, talks) => {

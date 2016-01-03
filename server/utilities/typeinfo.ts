@@ -8,6 +8,10 @@ export interface TypeInfoStatic {
     fromArgs(args: IArguments): TypeInfo<any>[];
 }
 
+export type ConstructorFunction<T> = Function & {
+    new (...args): T;  
+};
+
 export interface TypeInfo<T> {
     /** current subject */
     subject: T;
@@ -72,7 +76,7 @@ export interface TypeInfo<T> {
     /** chekc if the subject is an object of a certain type
      * @param type the constructor function of the type the subject is checked against
      */
-    isObjectOfType(type: Function): boolean;
+    isObjectOfType<T>(type: ConstructorFunction<T>): boolean;
 
     /** map current TypeInfo through a selector function
      * @param selector the selector function
