@@ -40,7 +40,8 @@ export interface Seq<T> extends Iterable<T> {
      * @param initialValue the initial value of reduction
      * @param reducer reducer function
      */
-    reduce<U>(initialValue: U, reducer: (left: U, right: T) => U): U;
+    reduce<U>(reducer: (left: U, right: T, rightIndex?: number, source?: Seq<T>) => U, initialValue: U): U;
+    reduce(reducer: (left: T, right: T, rightIndex?: number, source?: Seq<T>) => T): T;
 
     /** returns the first element of the sequence, or undefined if sequence is empty */
     first(): T;
@@ -190,13 +191,13 @@ class SeqImpl<T> implements Seq<T> {
         });
     }
 
-    reduce<U>(initialValue: U, reducer: (left: U, right: T) => U): U {
-        let left = initialValue;
-        for (const right of this) {
-            left = reducer(left, right);
+    reduce(...args): any {
+        if (args.length === 1) {
+            return this.__reduceWithoutInitialValue(args[0]);
         }
-
-        return left;
+        else {
+            return this.__reduceWithInitialValue(args[0], args[1]);
+        }
     }
 
     first(): T {
@@ -376,6 +377,36 @@ class SeqImpl<T> implements Seq<T> {
 
         return array;
     }
+    
+    private __reduceWithInitialValue<U>(reducer: (left: U, right: T, rightIndex?: number, source?: Seq<T>) => U, initialValue: U): U {
+        let left = initialValue;
+        this.forEach((right, index) => {
+            left = reducer(left, right, index, this);
+        });
+
+        return left;
+    }
+    
+    private __reduceWithoutInitialValue(reducer: (left: T, right: T, leftIndex?: number, source?: Seq<T>) => T): T {
+        let count = 0;
+        let left: T = undefined;
+        this.forEach((right, i) => {
+            ++count;
+            if (i === 0) {
+                left = right;
+            }
+            else {
+                left = reducer(left, right, i, this);
+            }
+        });
+        
+        if (count <= 0) {
+            throw new Error("Error attempt to reduce an empty sequence without an initial value.");
+        }
+        else {
+            return left;
+        }
+    }
 }
 
 class SeqArrayImpl<T> extends SeqImpl<T> {
@@ -546,26 +577,19 @@ seq.infinite = function (): Seq<number> {
 };
 
 seq.sum = function (subject: Seq<number>): number {
-    return subject.reduce(0, (x, y) => x + y);
+    return subject.reduce((x, y) => x + y, 0);
 };
 
 seq.max = function (subject: Seq<number>): number {
-    return subject.reduce(undefined, (x, y) => x === undefined ? y : Math.max(x, y));
+    return subject.reduce((x, y) => Math.max(x, y));
 };
 
 seq.min = function (subject: Seq<number>): number {
-    return subject.reduce(undefined, (x, y) => x === undefined ? y : Math.min(x, y));
+    return subject.reduce((x, y) => Math.min(x, y));
 };
 
 seq.average = function (subject: Seq<number>): number {
-    function undefinedToZero(n: number): number {
-        return n === undefined ? 0 : n;
-    }
-    
-    return subject.reduce({avg: <number> undefined, n: 0}, (x, y) => ({
-        avg: (x.n / (x.n + 1)) * undefinedToZero(x.avg) + y / (x.n + 1),
-        n: x.n + 1
-    })).avg;
+    return subject.reduce((left, right, index) => left * (index / (index + 1)) + right / (index + 1));
 };
 
 seq.join = function (subject: Seq<string>, separator?: string): string {
