@@ -18,10 +18,22 @@ export interface Optional<T> {
      */
     flatMap<U>(f: (t: T) => Optional<U>): Optional<U>;
     
-    /** Replaces a None optional with an optional with a value by supplying that value 
+    /** Replace a None optional with an optional with a value by supplying that value 
      * @param defaultValue the default value as replacement if the current optional is None
      */
     defaultIfNone(defaultValue: T): Optional<T>;
+    
+    /** Combine two optionals into one
+     * @param other the other optional
+     * @param f value combiner
+     */
+    combine<U, V>(other: Optional<U>, f: (t: T, u: U) => V): Optional<V>;
+    
+    /** Combine and flatten two optionals into one
+     * @param other the other optional
+     * @param f value combiner
+     */
+    flatCombine<U, V>(other: Optional<U>, f: (t: T, u: U) => Optional<V>): Optional<V>;
 }
 
 export interface OptionalFunc {
@@ -88,6 +100,14 @@ class Some<T> implements Optional<T> {
     defaultIfNone(t: T): Optional<T> {
         return this;
     }
+    
+    combine<U, V>(other: Optional<U>, f: (t: T, u: U) => V): Optional<V> {
+        return this.flatMap(t => other.map(u => f(t, u)));
+    }
+    
+    flatCombine<U, V>(other: Optional<U>, f: (t: T, u: U) => Optional<V>): Optional<V> {
+        return this.flatMap(t => other.flatMap(u => f(t, u)));
+    }
 }
 
 class None<T> implements Optional<T> {
@@ -107,6 +127,14 @@ class None<T> implements Optional<T> {
     
     defaultIfNone(t: T): Optional<T> {
         return optional(t);
+    }
+    
+    combine<U, V>(other: Optional<U>, f: (t: T, u: U) => V): Optional<V> {
+        return optional.none<V>();
+    }
+    
+    flatCombine<U, V>(other: Optional<U>, f: (t: T, u: U) => Optional<V>): Optional<V> {
+        return optional.none<V>();
     }
 }
 
