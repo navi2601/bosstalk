@@ -2,7 +2,7 @@
 
 import {default as entity} from "./mongoose-wrapper";
 import {Talk, Discussion} from "../models/talk";
-import * as mongoose from "mongoose";
+import {Model, Document} from "mongoose";
 
 const talkModel = entity<Talk>("talk", {
     timestamp: Date,
@@ -15,7 +15,7 @@ const talkModel = entity<Talk>("talk", {
 });
 
 const discussionModel = entity<Discussion>("discussion", {
-    talkId: mongoose.Types.ObjectId,
+    talkId: String,
     entries: [{
         poster: String,
         timestamp: Date,

@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Source code for bosstalk.net website",
   "private": true,
-  "main": "js/app.js",
+  "main": "js/server/app.js",
   "scripts": {
-    "start": "node lib/app.js",
+    "start": "node lib/server/app.js",
     "clean": "rm -r lib/ && rm -r public/js/ && rm -r public/css/",
     "build-server": "tsc",
     "build-client": "webpack && sass public/sass/main.scss public/css/main.scss.css",
