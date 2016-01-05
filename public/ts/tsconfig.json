@@ -9,5 +9,7 @@
 		"declaration": false,
 		"experimentalDecorators": true
 	},
-	"exclude": []
+	"files": [
+        "app.tsx"
+    ]
 }

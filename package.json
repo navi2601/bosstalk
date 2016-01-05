@@ -6,11 +6,11 @@
   "main": "js/server/app.js",
   "scripts": {
     "start": "node lib/server/app.js",
-    "clean": "rm -r lib/ && rm -r public/js/ && rm -r public/css/",
-    "build-server": "tsc",
-    "build-client": "webpack && sass public/sass/main.scss public/css/main.scss.css",
-    "build": "npm run build-server && npm run build-client",
-    "test": "npm run build-server && mocha lib/tests"
+    "clean": "jake clean",
+    "build-server": "jake build-server",
+    "build-client": "jake build-client",
+    "build": "jake build-server build-client",
+    "test": "jake test"
   },
   "keywords": [
     "bosstalk"
