@@ -4,7 +4,7 @@ module.exports = {
         app: "./public/ts/app.tsx"
     },
     output: {
-        path: "./public/js",
+        path: "./public/lib/js",
         filename: "[name].entry.js"
     },
     devtool: "source-map",

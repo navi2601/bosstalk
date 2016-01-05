@@ -27,8 +27,7 @@ build/Release
 node_modules
 
 lib
-public/js
-public/css
+public/lib
 typings
 .sass-cache
 

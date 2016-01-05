@@ -47,22 +47,38 @@ task("set-path", function () {
     }
 });
 
-desc("Clean up project");
-task("clean", {async: true}, function (){
-    console.log("cleaning up.");
-    var cleanLib = cleanDir("lib");
-    var cleanClientJS = cleanDir("public/js");
-    var cleanClientCSS = cleanDir("public/css");
-    
-    Promise.all([cleanLib, cleanClientJS, cleanClientCSS]).then(function () {
+desc("Clean up server artifacts");
+task("clean-server-lib", {async: true}, function () {
+    cleanDir("lib").then(function () {
+        complete();
+    }).catch(function (err) {
+        fail(err);
+    });
+})
+
+desc("Clean up client generated js files");
+task("clean-client-js", {async: true}, function () {
+    cleanDir("public/lib/js").then(function() {
         complete();
     }).catch(function (err) {
         fail(err);
     });
 });
 
+desc("Clean up client generated css files");
+task("clean-client-css", {async: true}, function () {
+    cleanDir("public/lib/css").then(function () {
+        complete();
+    }).catch(function (err) {
+        fail(err);
+    });
+});
+
+desc("Clean up project");
+task("clean", ["clean-server-lib", "clean-client-js", "clean-client-css"], function (){ });
+
 desc("Compile server TypeScript files");
-task("build-server-tsc", ["clean", "set-path"], {async: true}, function () {
+task("build-server-tsc", ["clean-server-lib", "set-path"], {async: true}, function () {
     shell("tsc", []).then(function () {
         complete();
     }).catch(function (err) {
@@ -76,8 +92,8 @@ task("build-server", ["build-server-tsc"], function () {
 });
 
 desc("Compile SASS style sheets");
-task("build-sass", ["clean", "set-path"], {async: true}, function () {
-    shell("sass", ["public/sass/main.scss", "public/css/main.css", "--style", "compressed"]).then(function (){
+task("build-sass", ["clean-client-css", "set-path"], {async: true}, function () {
+    shell("sass", ["public/sass/main.scss", "public/lib/css/main.css", "--style", "compressed"]).then(function (){
         complete();
     }).catch(function (err) {
         fail("failed to invoke sass"); 
@@ -85,7 +101,7 @@ task("build-sass", ["clean", "set-path"], {async: true}, function () {
 });
 
 desc("Compile client TypeScript files");
-task("build-client-tsc", ["clean", "set-path"], {async: true}, function (){
+task("build-client-tsc", ["clean-client-js", "set-path"], {async: true}, function (){
     shell("webpack", []).then(function () {
         complete();
     }).catch(function (err){
