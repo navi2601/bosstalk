@@ -191,12 +191,12 @@ class SeqImpl<T> implements Seq<T> {
         });
     }
 
-    reduce(...args): any {
-        if (args.length === 1) {
-            return this.__reduceWithoutInitialValue(args[0]);
+    reduce(): any {
+        if (arguments.length === 1) {
+            return this.__reduceWithoutInitialValue(arguments[0]);
         }
         else {
-            return this.__reduceWithInitialValue(args[0], args[1]);
+            return this.__reduceWithInitialValue(arguments[0], arguments[1]);
         }
     }
 
