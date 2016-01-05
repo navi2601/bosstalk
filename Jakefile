@@ -1,6 +1,7 @@
 var fs = require("fs");
 var fse = require("fs-extra");
 var childProc = require("child_process");
+var path = require("path");
 
 function shell(command, args) {
     return new Promise((resolve, reject) => {
@@ -32,6 +33,20 @@ function cleanDir(dir) {
     });
 }
 
+desc("add node modules bin folder to path");
+task("set-path", function () {
+    var paths = process.env.PATH.split(":");
+    var binDir = path.join(__dirname, "node_modules/.bin");
+    var filter = paths.filter(function (path) {
+        return path === binDir;
+    });
+    
+    if (filter.length == 0) {
+        paths.push(binDir);
+        process.env.PATH = paths.join(":");
+    }
+});
+
 desc("Clean up project");
 task("clean", {async: true}, function (){
     console.log("cleaning up.");
@@ -47,7 +62,7 @@ task("clean", {async: true}, function (){
 });
 
 desc("Compile server TypeScript files");
-task("build-server-tsc", ["clean"], {async: true}, function () {
+task("build-server-tsc", ["clean", "set-path"], {async: true}, function () {
     shell("tsc", []).then(function () {
         complete();
     }).catch(function (err) {
@@ -61,7 +76,7 @@ task("build-server", ["build-server-tsc"], function () {
 });
 
 desc("Compile SASS style sheets");
-task("build-sass", ["clean"], {async: true}, function () {
+task("build-sass", ["clean", "set-path"], {async: true}, function () {
     shell("sass", ["public/sass/main.scss", "public/css/main.css"]).then(function (){
         complete();
     }).catch(function (err) {
@@ -70,7 +85,7 @@ task("build-sass", ["clean"], {async: true}, function () {
 });
 
 desc("Compile client TypeScript files");
-task("build-client-tsc", ["clean"], {async: true}, function (){
+task("build-client-tsc", ["clean", "set-path"], {async: true}, function (){
     shell("webpack", []).then(function () {
         complete();
     }).catch(function (err){
@@ -85,7 +100,7 @@ desc("Build");
 task("build", ["build-server", "build-client", "test"], function () {});
 
 desc("Run tests");
-task("test", ["build-server"], {async: true}, function () {
+task("test", ["build-server", "set-path"], {async: true}, function () {
     shell("mocha", ["lib/tests"]).then(function (){
         complete();
     }).catch(function (err) {
