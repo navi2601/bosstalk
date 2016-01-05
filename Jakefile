@@ -77,7 +77,7 @@ task("build-server", ["build-server-tsc"], function () {
 
 desc("Compile SASS style sheets");
 task("build-sass", ["clean", "set-path"], {async: true}, function () {
-    shell("sass", ["public/sass/main.scss", "public/css/main.css"]).then(function (){
+    shell("sass", ["public/sass/main.scss", "public/css/main.css", "--style", "compressed"]).then(function (){
         complete();
     }).catch(function (err) {
         fail("failed to invoke sass"); 
