@@ -12,14 +12,14 @@ export function renderIn(containerId: string): ClassDecorator {
 			if (container != null) {
 				const instantiableTarget = target as any as React.ComponentClass<HTMLElement>;
 				ReactDom.render(React.createElement(instantiableTarget, {}), container);
-			}	
+			}
 			else {
-				console.error("Cannot locate container #" + containerId)
+				console.error("Cannot locate container #" + containerId);
 			}
 		});
-		
+
 		return target;
-	}
+	};
 }
 
 export class Row extends React.Component<any, any> {
@@ -27,35 +27,38 @@ export class Row extends React.Component<any, any> {
 		return (
 			<div className="row">
 				{this.props.children}
-			</div>
-		)
+				</div>
+		);
 	}
 }
 
-export class Col extends React.Component<{ sm?: number; md?: number; lg?:number, children?: any }, any> {
+export class Col extends React.Component<{ sm?: number; md?: number; lg?: number, children?: any }, any> {
 	render() {
 		return (
-			<div className={this.getClass()}>
+			<div className={this.getClass() }>
 				{this.props.children}
-			</div>
-		)
+				</div>
+		);
 	}
-	
+
 	getClass(): string {
 		const sm = this.props.sm;
 		const md = this.props.md;
 		const lg = this.props.lg;
-		
+
 		const buffer: string[] = [];
-		if (sm != null)
+		if (sm != null) {
 			buffer.push(`col-sm-${sm}`);
-		
-		if (md != null)
+		}
+
+		if (md != null) {
 			buffer.push(`col-md-${md}`);
-			
-		if (lg != null)
+		}
+
+		if (lg != null) {
 			buffer.push(`col-lg-${lg}`);
-			
+		}
+
 		return buffer.join(" ");
 	}
 }
