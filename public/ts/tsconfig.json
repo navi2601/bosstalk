@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "ES5",
-		"outDir": "../js",
+		"outDir": "../lib/js",
 		"module": "commonjs",
 		"jsx": "react",
 		"sourceMap": true,
@@ -9,5 +9,7 @@
 		"declaration": false,
 		"experimentalDecorators": true
 	},
-	"exclude": []
+	"files": [
+        "app.tsx"
+    ]
 }

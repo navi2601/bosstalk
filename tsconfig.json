@@ -1,12 +1,14 @@
 {
 	"compilerOptions": {
-		"target": "ES6",
+		"target": "es6",
 		"module": "commonjs",
 		"sourceMap": true,
+		"declaration": true,
 		"outDir": "lib"
 	},
-	"exclude":[
-		"node_modules",
-		"public"
-	]
+	"files": [
+        "server/app.ts",
+        "tests/index.ts",
+        "typings/tsd.d.ts"
+    ]
 }
