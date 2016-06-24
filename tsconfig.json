@@ -9,6 +9,6 @@
 	"files": [
         "server/app.ts",
         "tests/index.ts",
-        "typings/tsd.d.ts"
+        "typings/index.d.ts"
     ]
 }

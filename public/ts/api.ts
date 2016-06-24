@@ -1,4 +1,3 @@
-///<reference path="_references.ts" />
 import * as $ from "jquery";
 
 export class BossTalkApi {

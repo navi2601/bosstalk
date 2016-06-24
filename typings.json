@@ -6,6 +6,7 @@
     "chai": "registry:dt/chai#3.4.0+20160601211834",
     "es6-shim": "registry:dt/es6-shim#0.31.2+20160602141504",
     "express": "registry:dt/express#4.0.0+20160317120654",
+    "express-serve-static-core": "registry:dt/express-serve-static-core#0.0.0+20160617060422",
     "fs-extra": "registry:dt/fs-extra#0.0.0+20160517121359",
     "jquery": "registry:dt/jquery#1.10.0+20160620094458",
     "mime": "registry:dt/mime#0.0.0+20160316155526",
