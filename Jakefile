@@ -1,3 +1,4 @@
+///<reference path="./typings/index.d.ts"/>
 var fs = require("fs");
 var fse = require("fs-extra");
 var childProc = require("child_process");
@@ -77,8 +78,17 @@ task("clean-client-css", {async: true}, function () {
 desc("Clean up project");
 task("clean", ["clean-server-lib", "clean-client-js", "clean-client-css"], function (){ });
 
+desc("Install typings");
+task("install-typings", {async: true}, function () {
+    shell("typings", ["install"]).then(function (){
+        complete();
+    }).catch(function (err){
+        fail("failed to invoke typings");
+    })
+});
+
 desc("Compile server TypeScript files");
-task("build-server-tsc", ["clean-server-lib", "set-path"], {async: true}, function () {
+task("build-server-tsc", ["clean-server-lib", "set-path", "install-typings"], {async: true}, function () {
     shell("tsc", []).then(function () {
         complete();
     }).catch(function (err) {
@@ -101,7 +111,7 @@ task("build-sass", ["clean-client-css", "set-path"], {async: true}, function () 
 });
 
 desc("Compile client TypeScript files");
-task("build-client-tsc", ["clean-client-js", "set-path"], {async: true}, function (){
+task("build-client-tsc", ["clean-client-js", "set-path", "install-typings"], {async: true}, function (){
     shell("webpack", []).then(function () {
         complete();
     }).catch(function (err){
