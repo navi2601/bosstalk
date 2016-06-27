@@ -1,0 +1,21 @@
+{
+  "globalDependencies": {
+    "assertion-error": "registry:dt/assertion-error#1.0.0+20160316155526",
+    "body-parser": "registry:dt/body-parser#0.0.0+20160619023215",
+    "bootstrap": "registry:dt/bootstrap#3.3.5+20160619023404",
+    "chai": "registry:dt/chai#3.4.0+20160601211834",
+    "es6-shim": "registry:dt/es6-shim#0.31.2+20160602141504",
+    "express": "registry:dt/express#4.0.0+20160317120654",
+    "express-serve-static-core": "registry:dt/express-serve-static-core#0.0.0+20160617060422",
+    "fs-extra": "registry:dt/fs-extra#0.0.0+20160517121359",
+    "jquery": "registry:dt/jquery#1.10.0+20160620094458",
+    "mime": "registry:dt/mime#0.0.0+20160316155526",
+    "mocha": "registry:dt/mocha#2.2.5+20160619032855",
+    "mongodb": "registry:dt/mongodb#2.1.0+20160602142941",
+    "mongoose": "registry:dt/mongoose#3.8.5+20160624032237",
+    "node": "registry:dt/node#6.0.0+20160621231320",
+    "react": "registry:dt/react#0.14.0+20160621225615",
+    "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
+    "serve-static": "registry:dt/serve-static#0.0.0+20160606155157"
+  }
+}

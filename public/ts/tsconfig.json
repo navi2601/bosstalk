@@ -10,6 +10,7 @@
 		"experimentalDecorators": true
 	},
 	"files": [
-        "app.tsx"
+        "app.tsx",
+		"../../typings/index.d.ts"
     ]
 }

@@ -1,13 +1,9 @@
-///<reference path="_references.ts"/>
-"use strict";
-
 import * as React from "react";
-import * as ReactDOM from "react-dom";
+import * as ReactDom from "react-dom";
 import * as $ from "jquery";
-import {Row, Col, renderIn} from "./components";
+import {Row, Col} from "./components";
 import * as api from "./api";
 
-@renderIn("app-container")
 class AppComponent extends React.Component<any, { version: string }> {
 	api = new api.BossTalkApi();
 
@@ -30,3 +26,5 @@ class AppComponent extends React.Component<any, { version: string }> {
 		);
 	}
 }
+
+ReactDom.render(<AppComponent/>, document.getElementById("app-container"));
